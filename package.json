@@ -9,7 +9,7 @@
   "scripts": {
     "build": "npm run build -w jobsite-math && npm run build -w jobsite-math-mcp",
     "test": "npm run build && npm test -w jobsite-math && npm test -w jobsite-math-mcp",
-    "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p packages/mcp/tsconfig.json --noEmit",
+    "typecheck": "npm run build -w jobsite-math && tsc -p packages/mcp/tsconfig.json --noEmit",
     "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {
