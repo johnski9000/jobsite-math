@@ -2,15 +2,21 @@
   "name": "jobsite-math-workspace",
   "private": true,
   "type": "module",
-  "workspaces": ["packages/core", "packages/mcp"],
+  "workspaces": [
+    "packages/core",
+    "packages/mcp"
+  ],
   "scripts": {
     "build": "npm run build -w jobsite-math && npm run build -w jobsite-math-mcp",
     "test": "npm run build && npm test -w jobsite-math && npm test -w jobsite-math-mcp",
-    "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p packages/mcp/tsconfig.json --noEmit"
+    "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p packages/mcp/tsconfig.json --noEmit",
+    "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
     "typescript": "5.9.3"
   },
-  "engines": { "node": ">=22.18" }
+  "engines": {
+    "node": ">=22.18"
+  }
 }

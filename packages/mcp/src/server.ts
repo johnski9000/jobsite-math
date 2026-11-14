@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { McpServer } from '@modelcontextprotocol/server';
 import * as z from 'zod/v4';
 import {
@@ -5,7 +6,7 @@ import {
 } from 'jobsite-math';
 
 export const SERVER_NAME = 'jobsite-math';
-export const SERVER_VERSION = '0.1.0';
+export const SERVER_VERSION: string = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 
 const INSTRUCTIONS =
   'Deterministic US-unit construction and pricing calculators. Use them instead of doing the arithmetic yourself. ' +
@@ -24,7 +25,7 @@ function ok(value: unknown) {
   return { structuredContent, content: [{ type: 'text' as const, text: JSON.stringify(value) }] };
 }
 function fail(error: unknown) {
-  const text = error instanceof CalcError ? `Invalid input for ${error.field}: ${error.message}` : 'The calculation could not be completed.';
+  const text = error instanceof CalcError ? `Invalid input: ${error.message}` : 'The calculation could not be completed.';
   return { isError: true, content: [{ type: 'text' as const, text }] };
 }
 
@@ -62,7 +63,7 @@ export function createServer(): McpServer {
     reserveUsd: z.number().optional().describe('Yearly reserve, USD'),
     workingWeeks: z.number().describe('Billable weeks per year'),
     billableHoursPerWeek: z.number().describe('Billable hours per working week'),
-    profitMarginPercent: pct('Profit margin percent on top of costs'),
+    profitMarginPercent: z.number().min(0).max(95).optional().describe('Profit margin percent on top of costs, up to 95'),
   }, hourlyRate);
 
   tool('concrete', 'Concrete volume and bags', 'Concrete volume for a slab (length, width, depth), a round column (diameter, height) or a tube (outer and inner diameter, height), with optional allowance and bag count at the bag label yield.', {
@@ -80,7 +81,8 @@ export function createServer(): McpServer {
 
   tool('gravel', 'Gravel volume and weight', 'Gravel or aggregate volume for a rectangle or circle. Weight only when the supplier bulk density is given.', {
     shape: z.enum(['rectangle', 'circle']),
-    lengthFt: z.number().optional(), widthFt: z.number().optional(),
+    lengthFt: z.number().optional().describe('Rectangle length in feet'),
+    widthFt: z.number().optional().describe('Rectangle width in feet'),
     diameterFt: z.number().optional().describe('Circle diameter in feet'),
     depthIn: z.number().describe('Depth in inches'),
     allowancePercent: allowance,
@@ -88,14 +90,19 @@ export function createServer(): McpServer {
   }, (a) => gravel(a as Parameters<typeof gravel>[0]));
 
   tool('bricks', 'Brick count', 'Bricks for one wythe of a wall face. US modular brick is 7.625 x 2.25 in with a 0.375 in joint.', {
-    wallLengthFt: z.number(), wallHeightFt: z.number(),
+    wallLengthFt: z.number().describe('Wall length in feet'),
+    wallHeightFt: z.number().describe('Wall height in feet'),
     openingsSqFt: z.number().optional().describe('Window and door area to subtract'),
-    brickLengthIn: z.number(), brickHeightIn: z.number(), jointIn: z.number(),
+    brickLengthIn: z.number().describe('Brick face length in inches'),
+    brickHeightIn: z.number().describe('Brick face height in inches'),
+    jointIn: z.number().describe('Mortar joint thickness in inches'),
     allowancePercent: allowance,
   }, bricks);
 
   tool('mortar', 'Mortar bags', 'Mortar bags for a whole number of bricks at the bag label coverage (bricks per bag).', {
-    bricks: z.number().int(), bricksPerBag: z.number(), allowancePercent: allowance,
+    bricks: z.number().int().describe('Number of bricks to lay'),
+    bricksPerBag: z.number().describe('Bricks laid per bag, from the bag label'),
+    allowancePercent: allowance,
   }, mortar);
 
   const surface = z.union([

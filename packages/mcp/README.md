@@ -44,6 +44,6 @@ The assistant calls `concrete` with `{ "shape": "slab", "lengthFt": 24, "widthFt
 
 Planning estimates only: not structural design, code compliance, HVAC load calculation or tax advice. See the [`jobsite-math` README](https://github.com/johnski9000/jobsite-math/tree/main/packages/core#readme) for every formula and its assumptions.
 
-## Licence
+## License
 
 MIT. Copyright (c) 2026 JW Digital Services Ltd.

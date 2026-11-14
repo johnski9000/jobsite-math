@@ -1,5 +1,5 @@
 #!/usr/bin/env node
 import { serveStdio } from '@modelcontextprotocol/server/stdio';
-import { createServer } from './server.ts';
+import { createServer } from './server.js';
 
 serveStdio(createServer);

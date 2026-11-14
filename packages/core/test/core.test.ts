@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CalcError, roofPitch, hipRoof, markup, markupToMargin, marginToMarkup, hourlyRate,
   concrete, gravel, bricks, mortar, paint, drywall, deckBoards, MODULAR_BRICK,
-} from '../src/index.ts';
+} from '../dist/index.js';
 
 const close = (a: number | null, b: number, eps = 1e-9) => assert.ok(a !== null && Math.abs(a - b) < eps, `${a} != ${b}`);
 
@@ -20,10 +20,10 @@ test('hip roof agrees with independent plane areas and is symmetric', () => {
   const r = hipRoof({ lengthFt: 24, widthFt: 16, risePer12: 6 });
   const slant = Math.sqrt(8 ** 2 + 4 ** 2);
   close(r.roofAreaSqFt, 2 * ((16 * slant) / 2) + 2 * (((24 + 8) / 2) * slant), 1e-10);
-  assert.equal(r.ridgeFt, 8); assert.equal(r.hipRafterFt, 12); assert.equal(r.heightFt, 4);
+  assert.equal(r.ridgeFt, 8); assert.equal(r.hipRafterFt, 12); assert.equal(r.eaveToRidgeFt, 4); assert.equal(r.plateToRidgeFt, 4);
   assert.deepEqual(hipRoof({ lengthFt: 16, widthFt: 24, risePer12: 6 }), r);
   const o = hipRoof({ lengthFt: 24, widthFt: 16, overhangIn: 12, risePer12: 6 });
-  assert.equal(o.planAreaSqFt, 26 * 18); assert.equal(o.heightFt, 4.5); assert.equal(o.hipRafterFt, 13.5);
+  assert.equal(o.planAreaSqFt, 26 * 18); assert.equal(o.eaveToRidgeFt, 4.5); assert.equal(o.plateToRidgeFt, 4); assert.equal(o.hipRafterFt, 13.5);
   assert.throws(() => hipRoof({ lengthFt: 24, widthFt: 16, overhangIn: -1, risePer12: 6 }), CalcError);
   assert.throws(() => hipRoof({ lengthFt: 24, widthFt: 16, risePer12: 0 }), CalcError);
 });
@@ -115,4 +115,26 @@ test('errors name the field that failed', () => {
   // @ts-expect-error missing field
   try { gravel({ shape: 'rectangle', lengthFt: 10, depthIn: 3 }); assert.fail('should throw'); }
   catch (e) { assert.ok(e instanceof CalcError); assert.equal(e.field, 'widthFt'); assert.equal(e.code, 'not_a_number'); }
+});
+
+test('inputs are strict: wrong-shape fields, unknown keys and non-boolean flags are rejected', () => {
+  // @ts-expect-error diameterIn does not belong on a slab
+  assert.throws(() => concrete({ shape: 'slab', lengthFt: 10, widthFt: 6, depthIn: 4, diameterIn: 99 }), (e: any) => e instanceof CalcError && e.field === 'diameterIn' && e.code === 'unexpected_field');
+  // @ts-expect-error lengthFt does not belong on a circle
+  assert.throws(() => gravel({ shape: 'circle', diameterFt: 10, depthIn: 3, lengthFt: 5 }), CalcError);
+  // @ts-expect-error unknown key
+  assert.throws(() => roofPitch({ riseIn: 6, runIn: 12, email: 'x@example.invalid' }), CalcError);
+  // @ts-expect-error string flag
+  assert.throws(() => paint({ surface: { lengthFt: 12, widthFt: 10, heightFt: 8, includeCeiling: 'false' }, coats: 1, coverageSqFtPerGallon: 350 }), CalcError);
+  // @ts-expect-error both an area and room dimensions
+  assert.throws(() => paint({ surface: { areaSqFt: 100, lengthFt: 12 }, coats: 1, coverageSqFtPerGallon: 350 }), CalcError);
+  // @ts-expect-error null input
+  assert.throws(() => mortar(null), CalcError);
+  assert.throws(() => roofPitch({ riseIn: 6, runIn: 0 }), /runIn must be greater than 0/);
+});
+
+test('rounding stays exact for large and tiny quantities', () => {
+  assert.equal(mortar({ bricks: 999999999, bricksPerBag: 0.1 }).bags, 9999999990);
+  assert.equal(concrete({ shape: 'slab', lengthFt: 0.01, widthFt: 0.01, depthIn: 0.01, bagYieldCuFt: 1000 }).bags, 1);
+  assert.equal(mortar({ bricks: 370, bricksPerBag: 37, allowancePercent: 10 }).bags, 11);
 });

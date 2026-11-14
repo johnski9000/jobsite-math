@@ -1,4 +1,4 @@
-import { CalcError, num, opt } from './validate.ts';
+import { CalcError, fields, num, opt } from './validate.js';
 
 export interface MarkupInput {
   /** Job cost in US dollars. */
@@ -18,6 +18,7 @@ export interface MarkupResult {
 
 /** Selling price from a cost and either a markup or a gross margin percentage. Excludes sales tax. */
 export function markup(input: MarkupInput): MarkupResult {
+  fields('input', input, ['costUsd', 'percent', 'mode']);
   if (input.mode !== 'markup' && input.mode !== 'margin') throw new CalcError('bad_option', 'mode', 'mode must be "markup" or "margin"');
   const cost = num('costUsd', input.costUsd, 0.01, 1e9);
   const percent = num('percent', input.percent, 0, input.mode === 'margin' ? 99.99 : 1000);
@@ -49,7 +50,7 @@ export interface HourlyRateInput {
   workingWeeks: number;
   /** Billable hours in a working week (not hours on site plus travel and admin). */
   billableHoursPerWeek: number;
-  /** Profit margin on top of pay, overhead and reserve, percent. Default 0. */
+  /** Profit margin on top of pay, overhead and reserve, percent, up to 95. Default 0. */
   profitMarginPercent?: number;
 }
 
@@ -62,6 +63,7 @@ export interface HourlyRateResult {
 
 /** Hourly rate that covers pay, overhead, a reserve and a profit margin over your billable hours. */
 export function hourlyRate(input: HourlyRateInput): HourlyRateResult {
+  fields('input', input, ['targetPayUsd', 'overheadUsd', 'reserveUsd', 'workingWeeks', 'billableHoursPerWeek', 'profitMarginPercent']);
   const pay = num('targetPayUsd', input.targetPayUsd, 0, 1e8);
   const overhead = num('overheadUsd', input.overheadUsd, 0, 1e8);
   const reserve = opt('reserveUsd', input.reserveUsd, 0, 1e8, 0);

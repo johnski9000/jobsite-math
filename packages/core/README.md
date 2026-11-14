@@ -1,10 +1,10 @@
 # jobsite-math
 
-Small, zero-dependency TypeScript functions for the arithmetic US contractors do every day: roof pitch, hip roof area, concrete, gravel, brick, mortar, paint, drywall, deck boards, markup and hourly rate.
+Small, zero-dependency TypeScript functions for the math US contractors do every day: roof pitch, hip roof area, concrete, gravel, brick, mortar, paint, drywall, deck boards, markup and hourly rate.
 
 - US units, with the unit in every field name (`depthIn`, `lengthFt`, `bagYieldCuFt`), so there is no guessing.
 - Product figures (bag yield, paint coverage, sheet size, gravel density) are inputs, never hidden constants.
-- Quantities round up to whole bags, sheets and boards, without floating-point surprises (370 bricks at 37 per bag is 10 bags, not 11).
+- Quantities round up to whole bags, sheets and boards, without floating-point surprises: 370 bricks at 37 per bag plus 10% is 11 bags, where a naive `Math.ceil(370 * 1.1 / 37)` gives 12.
 - Bad input throws a `CalcError` that names the field.
 - ESM, typed, no runtime dependencies.
 
@@ -40,9 +40,9 @@ bricks({ wallLengthFt: 10, wallHeightFt: 10, ...MODULAR_BRICK, allowancePercent:
 | Function | What it returns | Formula and limits |
 |---|---|---|
 | `roofPitch({ riseIn, runIn, planAreaSqFt? })` | pitch in 12, degrees, percent, slope factor, sloped area, squares | slope factor = √(1 + (rise/run)²). One plane, geometry only. |
-| `hipRoof({ lengthFt, widthFt, overhangIn?, risePer12 })` | plan and roof area, squares, ridge, height, common and hip rafter line lengths | Rectangular plan, equal pitch on all four planes. Line lengths, not cut lengths. |
+| `hipRoof({ lengthFt, widthFt, overhangIn?, risePer12 })` | plan and roof area, squares, ridge, plate-to-ridge and eave-to-ridge height, common and hip rafter line lengths | Rectangular plan, equal pitch on all four planes. Rafter lengths run from the eave edge to the ridge and are line lengths, not cut lengths. |
 | `markup({ costUsd, percent, mode })` | price, profit, margin %, markup % | markup: cost × (1 + p). margin: cost ÷ (1 − p). Sales tax excluded. |
-| `markupToMargin(m)`, `marginToMarkup(g)` | the other percentage | m ÷ (100 + m), g ÷ (100 − g) |
+| `markupToMargin(m)`, `marginToMarkup(g)` | the other percentage | 100m ÷ (100 + m), 100g ÷ (100 − g) |
 | `hourlyRate({ targetPayUsd, overheadUsd, reserveUsd?, workingWeeks, billableHoursPerWeek, profitMarginPercent? })` | required revenue, billable hours, rate, profit | (pay + overhead + reserve) ÷ (1 − margin) ÷ billable hours |
 | `concrete({ shape: 'slab' \| 'round' \| 'tube', ... })` | cubic feet, with allowance, cubic yards, bags | Bags only when you give the bag label yield. Does not choose thickness, mix or reinforcing. |
 | `gravel({ shape: 'rectangle' \| 'circle', ... })` | cubic feet, cubic yards, pounds, short tons | Weight only when you give your supplier's bulk density. |
@@ -69,7 +69,7 @@ try {
 
 ## Use with AI assistants
 
-[`jobsite-math-mcp`](https://www.npmjs.com/package/jobsite-math-mcp) wraps these functions as a read-only MCP server, so Claude, Cursor and other MCP clients can call them instead of doing the arithmetic themselves.
+[`jobsite-math-mcp`](https://www.npmjs.com/package/jobsite-math-mcp) wraps these functions as a read-only MCP server, so Claude, Cursor and other MCP clients can call them instead of doing the math themselves.
 
 ## Not included, on purpose
 
@@ -77,8 +77,8 @@ Tax calculations (they change every year), HVAC load sizing (that is a Manual J 
 
 ## Background
 
-The same maths runs the free browser calculators at [contractorwebsiteshq.com/us/tools](https://contractorwebsiteshq.com/us/tools/).
+The same math runs the free browser calculators at [contractorwebsiteshq.com/us/tools](https://contractorwebsiteshq.com/us/tools/).
 
-## Licence
+## License
 
 MIT. Copyright (c) 2026 JW Digital Services Ltd.

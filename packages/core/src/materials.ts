@@ -1,4 +1,4 @@
-import { CalcError, ceilUnits, num, opt, whole } from './validate.ts';
+import { CalcError, ceilUnits, fields, flag, num, opt, whole } from './validate.js';
 
 const allowance = (value: unknown, field = 'allowancePercent') => opt(field, value, 0, 100, 0);
 
@@ -23,6 +23,11 @@ export interface ConcreteResult {
  * 80 lb bags state about 0.6 cubic feet). Does not choose thickness, mix or reinforcing.
  */
 export function concrete(input: ConcreteInput): ConcreteResult {
+  const shape = fields('input', input, ['shape', 'lengthFt', 'widthFt', 'depthIn', 'diameterIn', 'outerDiameterIn', 'innerDiameterIn', 'heightIn', 'allowancePercent', 'bagYieldCuFt']).shape;
+  const common = ['shape', 'allowancePercent', 'bagYieldCuFt'];
+  if (shape === 'slab') fields('input', input, [...common, 'lengthFt', 'widthFt', 'depthIn']);
+  else if (shape === 'round') fields('input', input, [...common, 'diameterIn', 'heightIn']);
+  else if (shape === 'tube') fields('input', input, [...common, 'outerDiameterIn', 'innerDiameterIn', 'heightIn']);
   const extra = allowance(input.allowancePercent);
   const yieldCuFt = input.bagYieldCuFt === undefined ? null : num('bagYieldCuFt', input.bagYieldCuFt, 0.001, 1000);
   let cubicFeet: number;
@@ -67,6 +72,10 @@ export interface GravelResult {
 
 /** Gravel or aggregate volume, and weight only when you supply your supplier's bulk density. */
 export function gravel(input: GravelInput): GravelResult {
+  const shape = fields('input', input, ['shape', 'lengthFt', 'widthFt', 'diameterFt', 'depthIn', 'allowancePercent', 'densityLbPerCuFt']).shape;
+  const common = ['shape', 'depthIn', 'allowancePercent', 'densityLbPerCuFt'];
+  if (shape === 'rectangle') fields('input', input, [...common, 'lengthFt', 'widthFt']);
+  else if (shape === 'circle') fields('input', input, [...common, 'diameterFt']);
   const extra = allowance(input.allowancePercent);
   const density = input.densityLbPerCuFt === undefined ? null : num('densityLbPerCuFt', input.densityLbPerCuFt, 0.001, 500);
   let area: number;
@@ -104,6 +113,7 @@ export interface BricksResult {
 
 /** Bricks for one wythe of a wall face. Use MODULAR_BRICK for standard US modular brick. */
 export function bricks(input: BricksInput): BricksResult {
+  fields('input', input, ['wallLengthFt', 'wallHeightFt', 'openingsSqFt', 'brickLengthIn', 'brickHeightIn', 'jointIn', 'allowancePercent']);
   const length = num('wallLengthFt', input.wallLengthFt, 0.1, 10000);
   const height = num('wallHeightFt', input.wallHeightFt, 0.1, 10000);
   const openings = opt('openingsSqFt', input.openingsSqFt, 0, length * height, 0);
@@ -128,6 +138,7 @@ export interface MortarInput {
 
 /** Mortar bags for a brick count at your bag's stated coverage. */
 export function mortar(input: MortarInput): { baseBags: number; bags: number } {
+  fields('input', input, ['bricks', 'bricksPerBag', 'allowancePercent']);
   const count = whole('bricks', input.bricks, 0, 1e9);
   const perBag = num('bricksPerBag', input.bricksPerBag, 0.1, 1e6);
   const extra = allowance(input.allowancePercent);
@@ -140,14 +151,16 @@ export function mortar(input: MortarInput): { baseBags: number; bags: number } {
 export type Surface = { lengthFt: number; widthFt: number; heightFt: number; includeCeiling?: boolean } | { areaSqFt: number };
 
 function surfaceArea(surface: Surface, openingsSqFt: unknown): number {
-  if (surface === null || typeof surface !== 'object') throw new CalcError('bad_option', 'surface', 'surface must be a room or an area');
+  const s = fields('surface', surface, ['areaSqFt', 'lengthFt', 'widthFt', 'heightFt', 'includeCeiling']);
   let gross: number;
-  if ('areaSqFt' in surface) gross = num('surface.areaSqFt', surface.areaSqFt, 0, 1e9);
-  else {
-    const l = num('surface.lengthFt', surface.lengthFt, 0.1, 10000);
-    const w = num('surface.widthFt', surface.widthFt, 0.1, 10000);
-    const h = num('surface.heightFt', surface.heightFt, 0.1, 1000);
-    gross = 2 * (l + w) * h + (surface.includeCeiling ? l * w : 0);
+  if ('areaSqFt' in s) {
+    fields('surface', s, ['areaSqFt']);
+    gross = num('surface.areaSqFt', s.areaSqFt, 0, 1e9);
+  } else {
+    const l = num('surface.lengthFt', s.lengthFt, 0.1, 10000);
+    const w = num('surface.widthFt', s.widthFt, 0.1, 10000);
+    const h = num('surface.heightFt', s.heightFt, 0.1, 1000);
+    gross = 2 * (l + w) * h + (flag('surface.includeCeiling', s.includeCeiling, false) ? l * w : 0);
   }
   return gross - opt('openingsSqFt', openingsSqFt, 0, gross, 0);
 }
@@ -171,6 +184,7 @@ export interface PaintResult {
 
 /** US gallons of paint for a room or area at the product's stated coverage. */
 export function paint(input: PaintInput): PaintResult {
+  fields('input', input, ['surface', 'openingsSqFt', 'coats', 'coverageSqFtPerGallon', 'allowancePercent']);
   const coats = whole('coats', input.coats, 1, 10);
   const coverage = num('coverageSqFtPerGallon', input.coverageSqFtPerGallon, 1, 10000);
   const extra = allowance(input.allowancePercent);
@@ -201,6 +215,7 @@ export interface DrywallResult {
 
 /** Drywall sheets for a room or area. Does not select a fire or sound rated assembly. */
 export function drywall(input: DrywallInput): DrywallResult {
+  fields('input', input, ['surface', 'openingsSqFt', 'layers', 'sheetWidthFt', 'sheetLengthFt', 'allowancePercent']);
   const layers = input.layers === undefined ? 1 : whole('layers', input.layers, 1, 4);
   const sheetAreaSqFt = num('sheetWidthFt', input.sheetWidthFt, 1, 10) * num('sheetLengthFt', input.sheetLengthFt, 1, 20);
   const extra = allowance(input.allowancePercent);
@@ -242,6 +257,7 @@ export interface DeckBoardsResult {
 
 /** Deck surface boards for a straight rectangular deck. Assumes no reuse of offcuts and no staggered joints. */
 export function deckBoards(input: DeckBoardsInput): DeckBoardsResult {
+  fields('input', input, ['lengthFt', 'widthFt', 'boardWidthIn', 'gapIn', 'boardLengthFt', 'allowancePercent']);
   const length = num('lengthFt', input.lengthFt, 0.1, 1000);
   const width = num('widthFt', input.widthFt, 0.1, 1000);
   const board = num('boardWidthIn', input.boardWidthIn, 0.1, 24);

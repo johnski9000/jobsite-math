@@ -1,16 +1,22 @@
 {
   "name": "jobsite-math-mcp",
   "version": "0.1.0",
-  "description": "MCP server with read-only US construction calculators (roof pitch, concrete, gravel, brick, paint, drywall, deck, markup) so AI assistants stop guessing the maths.",
+  "description": "MCP server with read-only US construction calculators (roof pitch, concrete, gravel, brick, paint, drywall, deck, markup) so AI assistants stop guessing the math.",
   "type": "module",
-  "bin": { "jobsite-math-mcp": "dist/cli.js" },
+  "bin": {
+    "jobsite-math-mcp": "dist/cli.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/server.d.ts",
       "default": "./dist/server.js"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "mcpName": "io.github.johnski9000/jobsite-math",
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -22,11 +28,29 @@
     "jobsite-math": "0.1.0",
     "zod": "4.6.7"
   },
-  "keywords": ["mcp", "mcp-server", "model-context-protocol", "construction", "contractor", "calculator", "roof-pitch", "concrete", "estimating"],
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "construction",
+    "contractor",
+    "calculator",
+    "roof-pitch",
+    "concrete",
+    "estimating"
+  ],
   "homepage": "https://github.com/johnski9000/jobsite-math/tree/main/packages/mcp#readme",
-  "repository": { "type": "git", "url": "git+https://github.com/johnski9000/jobsite-math.git", "directory": "packages/mcp" },
-  "bugs": { "url": "https://github.com/johnski9000/jobsite-math/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnski9000/jobsite-math.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/johnski9000/jobsite-math/issues"
+  },
   "license": "MIT",
   "author": "JW Digital Services Ltd",
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

@@ -1,6 +1,6 @@
 # jobsite-math
 
-Exact, tested calculators for the arithmetic US contractors do every day, in two packages:
+Exact, tested calculators for the math US contractors do every day, in two packages:
 
 | Package | What it is |
 |---|---|
@@ -21,10 +21,10 @@ npm install
 npm test        # builds both packages, runs unit tests and an end-to-end stdio test
 ```
 
-Node.js 22.18 or later for development (tests run TypeScript directly). The published packages need Node.js 18 (core) or 20 (MCP).
+Node.js 22.18 or later for development (tests run TypeScript directly). The published packages need Node.js 20 or later.
 
 Issues and pull requests are welcome, especially corrections from people who do this work on site.
 
-## Licence
+## License
 
-MIT. Copyright (c) 2026 JW Digital Services Ltd. The same maths runs the free browser calculators at [contractorwebsiteshq.com/us/tools](https://contractorwebsiteshq.com/us/tools/).
+MIT. Copyright (c) 2026 JW Digital Services Ltd. The same math runs the free browser calculators at [contractorwebsiteshq.com/us/tools](https://contractorwebsiteshq.com/us/tools/).
