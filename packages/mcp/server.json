@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.johnski9000/jobsite-math",
+  "title": "Jobsite Math",
+  "description": "Read-only US construction calculators: roof pitch, concrete, gravel, brick, paint, drywall, deck, markup",
+  "repository": {
+    "url": "https://github.com/johnski9000/jobsite-math",
+    "source": "github",
+    "subfolder": "packages/mcp"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "jobsite-math-mcp",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" }
+    }
+  ]
+}
