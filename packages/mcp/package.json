@@ -1,6 +1,6 @@
 {
   "name": "jobsite-math-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server with read-only US construction calculators (roof pitch, concrete, gravel, brick, paint, drywall, deck, markup) so AI assistants stop guessing the math.",
   "type": "module",
   "bin": {
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.4.0",
-    "jobsite-math": "0.1.0",
+    "jobsite-math": "0.1.1",
     "zod": "4.6.7"
   },
   "keywords": [
@@ -39,7 +39,7 @@
     "concrete",
     "estimating"
   ],
-  "homepage": "https://github.com/johnski9000/jobsite-math/tree/main/packages/mcp#readme",
+  "homepage": "https://contractorwebsiteshq.com/us/tools/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/johnski9000/jobsite-math.git",

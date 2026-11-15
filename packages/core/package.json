@@ -1,6 +1,6 @@
 {
   "name": "jobsite-math",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Zero-dependency US construction and contractor calculators: roof pitch, hip roof, concrete, gravel, brick, mortar, paint, drywall, deck boards, markup and hourly rate.",
   "type": "module",
   "exports": {
@@ -36,7 +36,7 @@
     "estimating",
     "us-units"
   ],
-  "homepage": "https://github.com/johnski9000/jobsite-math#readme",
+  "homepage": "https://contractorwebsiteshq.com/us/tools/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/johnski9000/jobsite-math.git",
